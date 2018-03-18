@@ -3,10 +3,15 @@
 #include "dartboard.h"
 #include <QDateTime>
 
+
+
 class Dart
 {
 public:
-    Dart(QPointF _exactLocation,QPointF _intendedLocation=QPointF(), bool _generated=false);
+    Dart(QPointF _exactLocation,QPointF _intendedLocation=QPointF(), bool _generated=false, INTENT _intent=UNKNOWN);
+
+
+    enum INTENT {UNKNOWN, SCORE, SETUP, FINISH};
 
     void setBust(bool _bust=true);
 
@@ -18,6 +23,10 @@ public:
     void editIntendedLocation(QPointF _intendedLocation);
 
     QString getString(bool shortForm=true);
+
+    INTENT getIntent(){
+        return intent;
+    }
 
     double getDeviationCm();
     double getHDev();
@@ -38,6 +47,7 @@ private:
     QPointF exactLocation;
     QPointF intendedLocation;
     QDateTime date;
+    INTENT intent;
     bool bust;
     bool generated;
 };

@@ -2,9 +2,10 @@
 #include <QVector2D>
 #include <QDebug>
 
-Dart::Dart(QPointF _exactLocation, QPointF _intendedLocation, bool _generated){
+Dart::Dart(QPointF _exactLocation, QPointF _intendedLocation, bool _generated, INTENT _intent){
     bust=false;
     generated = _generated;
+    intent = _intent;
     exactLocation =_exactLocation;
     intendedLocation =_intendedLocation;
     location = DartBoard::getInstance()->getThrowResult(exactLocation);
