@@ -8,10 +8,11 @@
 class Dart
 {
 public:
+    enum INTENT {UNKNOWN, SCORE, SETUP, FINISH};
     Dart(QPointF _exactLocation,QPointF _intendedLocation=QPointF(), bool _generated=false, INTENT _intent=UNKNOWN);
 
 
-    enum INTENT {UNKNOWN, SCORE, SETUP, FINISH};
+
 
     void setBust(bool _bust=true);
 
