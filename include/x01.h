@@ -13,6 +13,8 @@ public:
     {
       if(variants.contains(X01_301)){
           X=3;
+      }else if(variants.contains(X01_101)){
+          X=1;
       }else if(variants.contains(X01_501)){
           X=5;
       }else if(variants.contains(X01_701)){

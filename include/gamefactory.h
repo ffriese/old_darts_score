@@ -48,6 +48,9 @@ public:
                 case 5:
                     _variants.append(Game::VARIANT::X01_501);
                     break;
+                case 1:
+                    _variants.append(Game::VARIANT::X01_101);
+                    break;
                 case 3:
                 default:
                     _variants.append(Game::VARIANT::X01_301);
@@ -63,6 +66,7 @@ public:
 
         QList<QString> getAvailableGames(){
             return {
+                "101",
                 "301",
                 "501",
                 "701",
