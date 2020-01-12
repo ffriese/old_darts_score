@@ -8,9 +8,58 @@
 #include <QSharedPointer>
 #include <QFontDatabase>
 #include <QBoxLayout>
+#include <QJsonObject>
+#include <QJsonDocument>
 #include "newgamedialog.h"
 #include "manageplayersdialog.h"
 #include "globalconfig.h"
+
+#include "MQTTClient.h"
+
+#define ADDRESS     "tcp://192.168.178.67:1883"
+//#define ADDRESS     "tcp://localhost:1883"
+#define CLIENTID    "DartsScoringApp"
+#define TOPIC       "board_coordinate"
+#define QOS         1
+#define TIMEOUT     10000L
+
+
+volatile MQTTClient_deliveryToken deliveredtoken;
+
+void delivered(void *context, MQTTClient_deliveryToken dt)
+{
+    qDebug()<<"Message with token value "<< dt << "delivery confirmed";
+
+    deliveredtoken = dt;
+}
+
+
+int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message)
+{
+    qDebug()<<"message arrived!";
+    QString mystr = QString::fromUtf8((char*)message->payload).left(message->payloadlen);
+    qDebug()<<mystr;
+
+    QJsonDocument doc = QJsonDocument::fromJson(mystr.toUtf8());
+    QJsonObject jObject = doc.object();
+    double x = jObject.take("x").toDouble();
+    double y = jObject.take("y").toDouble();
+    //convert the json object to variantmap
+    QVariantMap mainMap = jObject.toVariantMap();
+    qDebug()<<"["<<x<<","<<y<<"]";
+    ((MainWindow*)context)->cvDart(QPointF(x,y));
+    MQTTClient_freeMessage(&message);
+    MQTTClient_free(topicName);
+    return 1;
+}
+void connlost(void *context, char *cause)
+{
+   qDebug()<<"Connection lost...";
+}
+/*void MainWindow::updateDart(const QMqttMessage &msg){
+    qDebug()<<QString::fromStdString((msg.payload().toStdString()));
+}*/
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -25,6 +74,32 @@ MainWindow::MainWindow(QWidget *parent) :
         family="Arial";
     }*/
 
+    MQTTClient client;
+    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+    int rc;
+    MQTTClient_create(&client, ADDRESS, CLIENTID,
+        MQTTCLIENT_PERSISTENCE_NONE, NULL);
+    conn_opts.keepAliveInterval = 20;
+    conn_opts.cleansession = 1;
+    MQTTClient_setCallbacks(client, this, connlost, msgarrvd, delivered);
+    if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS)
+    {
+       // printf("Failed to connect, return code %d\n", rc);
+        qDebug()<<"FAILED TO CONNECT TO MQTT BROKER AT"<<ADDRESS;
+    }
+    else{
+        // printf("Subscribing to topic %s\nfor client %s using QoS%d\n\n"
+        //        "Press Q<Enter> to quit\n\n", TOPIC, CLIENTID, QOS);
+         MQTTClient_subscribe(client, TOPIC, QOS);
+         qDebug()<<"CONNECTED TO MQTTBROKER AT"<<ADDRESS;
+    }
+
+/*
+    sub = n.subscribe("/thrown_dart", 1000, &MainWindow::cvDart, this);
+ // Use 1 thread
+    spinner.reset(new ros::AsyncSpinner(1));
+    spinner->start();
+*/
     blocked = false;
     scoreFont = QFont("Arial",15);
 
@@ -89,6 +164,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this,SIGNAL(signalPlayerChange(int,QSharedPointer<Player>)),gameManager,SLOT(requestPlayerChange(int,QSharedPointer<Player>)));
     connect(this,SIGNAL(signalPlayerNumChange(int,QList<QSharedPointer<Player>>)),gameManager,SLOT(changeNumOfPlayers(int,QList<QSharedPointer<Player>>)));
 
+    connect(this,SIGNAL(newCvDart(QPointF,QPointF)),gameManager,SLOT(handleUserDart(QPointF,QPointF)));
+
     connect(ui->dartboardWidget,SIGNAL(newUserDart(QPointF,QPointF)),gameManager,SLOT(handleUserDart(QPointF,QPointF)));
     connect(ui->dartboardWidget,SIGNAL(requestAIDart(QPointF)),gameManager,SLOT(handleAIDartRequest(QPointF)));
     connect(ui->actionGenerate_Throw,SIGNAL(triggered()),gameManager,SLOT(throwAIDart()));
@@ -130,6 +207,16 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+/*
+void MainWindow::cvDart(const geometry_msgs::Point::ConstPtr& msg){
+    ROS_INFO_STREAM("RECEIVED ROS-COORDINATES: [" << msg->x <<","<< msg->y<<"]");
+    emit newCvDart(QPointF(msg->x,msg->y),
+                     QPointF());
+}
+*/
+
+
 
 
 void MainWindow::toggleSound(bool off){

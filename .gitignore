@@ -1,3 +1,5 @@
+Makefile
+sounds/
 build/
 *.user
 *.user.*

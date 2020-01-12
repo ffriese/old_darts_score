@@ -18,7 +18,9 @@
 #include "player.h"
 #include "playerwidget.h"
 #include "statviewer.h"
-
+//#include <ros/ros.h>
+//#include <geometry_msgs/Point.h>
+//#include <QtMqtt/QtMqtt>
 
 namespace Ui {
 class MainWindow;
@@ -33,7 +35,9 @@ public:
     ~MainWindow();
 
     void resizeEvent(QResizeEvent *);
-
+    void cvDart(QPointF dart){emit newCvDart(dart, QPointF());}
+    //void cvDart(const geometry_msgs::Point::ConstPtr&);
+    //void updateDart(const QMqttMessage &msg);
 
 public slots:
 
@@ -58,9 +62,13 @@ private slots:
 signals:
     void signalPlayerChange(int index, QSharedPointer<Player> player);
     void signalPlayerNumChange(int number, QList<QSharedPointer<Player>> dbPlayerOrder);
-
+    void newCvDart(QPointF loc, QPointF intendedLoc);
 
 private:
+   /* ros::NodeHandle n;
+    ros::Subscriber sub;
+    QSharedPointer<ros::AsyncSpinner> spinner;
+*/
     QList<QSharedPointer<Player>> dbPlayerOrder;
     QMap<QString,QSharedPointer<Player>> db_players;
 
@@ -87,7 +95,6 @@ private:
     Ui::MainWindow *ui;
     DBManager* database;
     GameManager* gameManager;
-
 
     void fakeResize();
 

@@ -29,7 +29,7 @@ void Cricket::checkClosed(int num){
 
 Game::DARTRESULT Cricket::handleDart(QSharedPointer<Dart> dart){
 
-    qDebug()<<getCurrentPlayer()->getName()<<":"<<getCurrentPlayer()->getDartsLeft()<<"darts left"<<getCurrentPlayer().data();
+    //qDebug()<<getCurrentPlayer()->getName()<<":"<<getCurrentPlayer()->getDartsLeft()<<"darts left"<<getCurrentPlayer().data();
     QPair<int,DartBoard::BED> result = DartBoard::getInstance()->getThrowResult(dart->getExactLocation());
     int score = DartBoard::getInstance()->calcScore(result);
 

@@ -9,6 +9,7 @@ QT += gui
 QT += sql
 QT += svg
 QT += multimedia
+#Qt += mqtt
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++11
@@ -17,6 +18,12 @@ QMAKE_LFLAGS +=  -std=c++11
 TARGET = darts
 TEMPLATE = app
 INCLUDEPATH += include
+unix{
+INCLUDEPATH += external/unix
+}
+win{
+INCLUDEPATH += external/windows
+}
 
 DEFINES += QT_DEBUG_PLUGINS
 
@@ -80,6 +87,15 @@ win32{
     RC_ICONS = $$PWD/img/app.ico
 }
 #LIBS +=  -L/usr/local -L/usr -lboost_geometry
+
+message($$PWD)
+unix{
+     QMAKE_LFLAGS += -Wl,--rpath $$PWD/lib
+     LIBS += -L$$PWD/lib -lpaho-mqtt3a -lpaho-mqtt3as -lpaho-mqtt3c
+#    QMAKE_LFLAGS += -Wl,--rpath /opt/ros/kinetic/lib
+#    LIBS += -L/opt/ros/kinetic/lib -lroscpp -lroscpp_serialization -lrosconsole
+#    INCLUDEPATH += "/opt/ros/kinetic/include"
+}
 
 CONFIG+=resources_big
 RESOURCES += \

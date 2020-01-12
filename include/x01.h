@@ -67,7 +67,7 @@ public:
             }
             idx++;
         }
-        qDebug()<<"check for winner: "<<-1;
+        //qDebug()<<"check for winner: "<<-1;
         return -1;
     }
 
