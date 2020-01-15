@@ -14,6 +14,8 @@
 #include "manageplayersdialog.h"
 #include "globalconfig.h"
 
+#include <math.h> 
+
 #include "MQTTClient.h"
 
 #define ADDRESS     "tcp://192.168.178.67:1883"
